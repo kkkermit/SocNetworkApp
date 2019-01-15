@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SocNetworkApp.API.Models;
 
 namespace SocNetworkApp.API.Data
 {
@@ -6,5 +7,7 @@ namespace SocNetworkApp.API.Data
     {
         public DataContext(DbContextOptions<DataContext> options) : base(options)
         { }
+
+        public DbSet<User> Users { get; set; }
     }
 }
