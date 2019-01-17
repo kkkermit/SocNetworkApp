@@ -1,5 +1,11 @@
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using SocNetworkApp.API.Data;
 using SocNetworkApp.API.Dtos;
 using SocNetworkApp.API.Models;
@@ -11,10 +17,12 @@ namespace SocNetworkApp.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthRepository _repository;
+        private readonly IConfiguration _config;
 
-        public AuthController(IAuthRepository repository)
+        public AuthController(IAuthRepository repository, IConfiguration config)
         {
             _repository = repository;
+            _config = config;
         }
 
         [HttpPost("register")]
@@ -40,6 +48,37 @@ namespace SocNetworkApp.API.Controllers
             User createdUser = await _repository.Register(userToCreate, userRegister.Password);
 
             return StatusCode(201);
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(UserLoginDto userLoginDto)
+        {
+            User user = await _repository.Login(userLoginDto.Username.ToLower(), userLoginDto.Password);
+
+            if (user == null) 
+            {
+                return Unauthorized();
+            }
+
+            Claim[] claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Username)
+            };
+
+            SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config.GetSection("AppSettings:Token").Value));
+            SigningCredentials credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.Now.AddDays(1),
+                SigningCredentials = credentials
+            };
+
+            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+            SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
+
+            return Ok(new {token = tokenHandler.WriteToken(token)});
         }
     }
 }
