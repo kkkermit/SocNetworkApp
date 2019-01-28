@@ -24,6 +24,7 @@ namespace SocNetworkApp.API.Helpers
                     opt.MapFrom(d => d.DateOfBirth.CalculateAge());
                 });
             CreateMap<Photo, PhotoDetailedDto>();
+            CreateMap<UserUpdateDto, User>();
         }
     }
 }

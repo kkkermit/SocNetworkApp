@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -41,6 +42,25 @@ namespace SocNetworkApp.API.Controllers
             UserDetailedDto UserDetailedDto = _mapper.Map<UserDetailedDto>(user);
 
             return Ok(UserDetailedDto);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(Guid id, UserUpdateDto userUpdateDto)
+        {
+            if (id != Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value)) 
+            {
+                return Unauthorized();
+            }
+
+            User user = await _repository.GetUser(id);
+            _mapper.Map(userUpdateDto, user);
+
+            if (await _repository.SaveAll())
+            {
+                return NoContent();
+            }
+
+            throw new Exception($"Updating user {id} failed on save");
         }
     }
 }
