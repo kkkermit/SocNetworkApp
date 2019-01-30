@@ -1,8 +1,8 @@
 using System;
 
-namespace SocNetworkApp.API.Models
+namespace SocNetworkApp.API.Dtos
 {
-    public class Photo
+    public class PhotoReturnDto
     {
         public Guid Id { get; set; }
         public string Url { get; set; }
@@ -10,7 +10,5 @@ namespace SocNetworkApp.API.Models
         public DateTime DateAdded { get; set; }
         public bool IsMain { get; set; }
         public string PublicId { get; set; }
-        public User User { get; set; }
-        public Guid UserId { get; set; }
     }
 }

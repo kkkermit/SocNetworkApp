@@ -25,6 +25,11 @@ namespace SocNetworkApp.API.Data
             _context.Remove(entity);
         }
 
+        public async Task<Photo> GetPhoto(Guid id)
+        {
+            return await _context.Photos.FirstOrDefaultAsync(p => p.Id == id);
+        }
+
         public async Task<User> GetUser(Guid id)
         {
             return await _context.Users.Include(p => p.Photos).FirstOrDefaultAsync(u => u.Id == id);
@@ -39,5 +44,7 @@ namespace SocNetworkApp.API.Data
         {
             return await _context.SaveChangesAsync() > 0;
         }
+
+
     }
 }

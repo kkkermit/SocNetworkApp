@@ -30,18 +30,18 @@ namespace SocNetworkApp.API.Controllers
         public async Task<IActionResult> GetUsers()
         {
             IEnumerable<User> users = await _repository.GetUsers();
-            IEnumerable<UserListDto> UserListDtos = _mapper.Map<IEnumerable<UserListDto>>(users);
+            IEnumerable<UserListDto> userListDtos = _mapper.Map<IEnumerable<UserListDto>>(users);
 
-            return Ok(UserListDtos);
+            return Ok(userListDtos);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUser(Guid id)
         {
             User user = await _repository.GetUser(id);
-            UserDetailedDto UserDetailedDto = _mapper.Map<UserDetailedDto>(user);
+            UserDetailedDto userDetailedDto = _mapper.Map<UserDetailedDto>(user);
 
-            return Ok(UserDetailedDto);
+            return Ok(userDetailedDto);
         }
 
         [HttpPut("{id}")]
