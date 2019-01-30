@@ -17,7 +17,7 @@ namespace SocNetworkApp.API.Data
 
         public async Task<User> Login(string username, string password)
         {
-            User user = await _context.Users.FirstOrDefaultAsync(x => x.Username == username);
+            User user = await _context.Users.Include(p => p.Photos).FirstOrDefaultAsync(x => x.Username == username);
 
             if (user == null)
             {

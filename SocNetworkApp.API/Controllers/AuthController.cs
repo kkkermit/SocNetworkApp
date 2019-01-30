@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -17,11 +18,13 @@ namespace SocNetworkApp.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthRepository _repository;
+        private readonly IMapper _mapper;
         private readonly IConfiguration _config;
 
-        public AuthController(IAuthRepository repository, IConfiguration config)
+        public AuthController(IAuthRepository repository, IConfiguration config, IMapper mapper)
         {
             _repository = repository;
+            _mapper = mapper;
             _config = config;
         }
 
@@ -77,8 +80,13 @@ namespace SocNetworkApp.API.Controllers
 
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
             SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
+            UserListDto userListDto = _mapper.Map<UserListDto>(user);
 
-            return Ok(new {token = tokenHandler.WriteToken(token)});
+            return Ok(new 
+            {
+                token = tokenHandler.WriteToken(token),
+                user = userListDto
+            });
         }
     }
 }

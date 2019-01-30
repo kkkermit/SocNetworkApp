@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using SocNetworkApp.API.Models;
@@ -23,6 +24,11 @@ namespace SocNetworkApp.API.Data
         public void Delete<T>(T entity) where T : class
         {
             _context.Remove(entity);
+        }
+
+        public async Task<Photo> GetMainPhotoForUser(Guid userId)
+        {
+            return await _context.Photos.FirstOrDefaultAsync(p => p.UserId == userId && p.IsMain);
         }
 
         public async Task<Photo> GetPhoto(Guid id)

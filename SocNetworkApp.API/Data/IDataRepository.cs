@@ -13,5 +13,6 @@ namespace SocNetworkApp.API.Data
         Task<IEnumerable<User>> GetUsers();
         Task<User> GetUser(Guid id);
         Task<Photo> GetPhoto(Guid id);
+        Task<Photo> GetMainPhotoForUser(Guid userId);
     }
 }

@@ -27,8 +27,8 @@ namespace SocNetworkApp.API.Controllers
         private readonly IOptions<CloudinarySettings> _cloudinaryConfig;
         private Cloudinary _cloudinary;
 
-        public PhotosController(IDataRepository repository, 
-                                IMapper mapper, 
+        public PhotosController(IDataRepository repository,
+                                IMapper mapper,
                                 IOptions<CloudinarySettings> cloudinaryConfig)
         {
             _repository = repository;
@@ -105,6 +105,90 @@ namespace SocNetworkApp.API.Controllers
             }
 
             return BadRequest("Could not add the photo");
+        }
+
+        [HttpPost("{id}/setMain")]
+        public async Task<IActionResult> SetMainPhoto(Guid userId, Guid id)
+        {
+            if (userId != Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value)) 
+            {
+                return Unauthorized();
+            }
+
+            User user = await _repository.GetUser(userId);
+
+            if (!user.Photos.Any(p => p.Id == id))
+            {
+                return Unauthorized();
+            }
+
+            Photo photo = await _repository.GetPhoto(id);
+
+            if (photo.IsMain)
+            {
+                return BadRequest("This is already the main photo");
+            }
+
+            Photo currentMainPhoto = await _repository.GetMainPhotoForUser(userId);
+
+            if (currentMainPhoto != null)
+            {
+                currentMainPhoto.IsMain = false;
+                photo.IsMain = true;
+            }
+
+            if (await _repository.SaveAll())
+            {
+                return NoContent();
+            }
+
+            return BadRequest("Could not set photo to main");
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePhoto(Guid userId, Guid id)
+        {
+            if (userId != Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value)) 
+            {
+                return Unauthorized();
+            }
+
+            User user = await _repository.GetUser(userId);
+
+            if (!user.Photos.Any(p => p.Id == id))
+            {
+                return Unauthorized();
+            }
+
+            Photo photo = await _repository.GetPhoto(id);
+
+            if (photo.IsMain)
+            {
+                return BadRequest("You cannot delete your main photo");
+            }
+
+            if (string.IsNullOrEmpty(photo.PublicId))
+            {
+                 _repository.Delete(photo);
+            }
+            else 
+            {
+                DeletionParams deletionParams = new DeletionParams(photo.PublicId);
+
+                DeletionResult deletionResult = _cloudinary.Destroy(deletionParams);
+
+                if (deletionResult.Result == "ok")
+                {
+                    _repository.Delete(photo);
+                }
+            }
+
+            if (await _repository.SaveAll())
+            {
+                return Ok();
+            }
+
+            return BadRequest("Failed to delete the photo");
         }
     }
 }
