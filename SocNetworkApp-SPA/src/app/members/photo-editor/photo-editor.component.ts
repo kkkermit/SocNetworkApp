@@ -55,7 +55,12 @@ export class PhotoEditorComponent implements OnInit {
           description: result.description,
           isMain: result.isMain
         };
+
         this.photos.push(photo);
+
+        if (photo.isMain) {
+          this.updateMemberPhoto(photo.url);
+        }
       }
     };
   }
@@ -65,9 +70,7 @@ export class PhotoEditorComponent implements OnInit {
       this.currentMain = this.photos.filter(p => p.isMain)[0];
       this.currentMain.isMain = false;
       photo.isMain = true;
-      this.authService.changeMemberPhoto(photo.url);
-      this.authService.currentUser.photoUrl = photo.url;
-      localStorage.setItem('user', JSON.stringify(this.authService.currentUser));
+      this.updateMemberPhoto(photo.url);
       this.alertify.success('Successfully set to main');
     }, error => {
       this.alertify.error(error);
@@ -83,5 +86,11 @@ export class PhotoEditorComponent implements OnInit {
         this.alertify.error('Failed to delete the photo');
       });
     }, () => { } );
+  }
+
+  updateMemberPhoto(photoUrl: string) {
+    this.authService.changeMemberPhoto(photoUrl);
+    this.authService.currentUser.photoUrl = photoUrl;
+    localStorage.setItem('user', JSON.stringify(this.authService.currentUser));
   }
 }

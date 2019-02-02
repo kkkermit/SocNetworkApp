@@ -25,8 +25,9 @@ namespace SocNetworkApp.API.Helpers
                 });
             CreateMap<Photo, PhotoDetailedDto>();
             CreateMap<UserUpdateDto, User>();
-            CreateMap<PhotoReturnDto, Photo>();
+            CreateMap<Photo, PhotoReturnDto>();
             CreateMap<PhotoCreationDto, Photo>();
+            CreateMap<UserRegisterDto, User>();
         }
     }
 }

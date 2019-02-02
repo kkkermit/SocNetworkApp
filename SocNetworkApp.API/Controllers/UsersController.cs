@@ -35,7 +35,7 @@ namespace SocNetworkApp.API.Controllers
             return Ok(userListDtos);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "GetUser")]
         public async Task<IActionResult> GetUser(Guid id)
         {
             User user = await _repository.GetUser(id);

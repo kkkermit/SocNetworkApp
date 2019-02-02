@@ -162,10 +162,10 @@ namespace SocNetworkApp.API.Controllers
 
             Photo photo = await _repository.GetPhoto(id);
 
-            if (photo.IsMain)
-            {
-                return BadRequest("You cannot delete your main photo");
-            }
+            // if (photo.IsMain)
+            // {
+            //     return BadRequest("You cannot delete your main photo");
+            // }
 
             if (string.IsNullOrEmpty(photo.PublicId))
             {

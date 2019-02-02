@@ -29,28 +29,27 @@ namespace SocNetworkApp.API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(UserRegisterDto userRegister)
+        public async Task<IActionResult> Register(UserRegisterDto userRegisterDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            userRegister.Username = userRegister.Username.ToLower();
+            userRegisterDto.Username = userRegisterDto.Username.ToLower();
 
-            if(await _repository.UserExists(userRegister.Username))
+            if(await _repository.UserExists(userRegisterDto.Username))
             {
                 return BadRequest("Username already exists");
             }
 
-            User userToCreate = new User
-            {
-                Username = userRegister.Username
-            };
+            User userToCreate =  _mapper.Map<User>(userRegisterDto);
 
-            User createdUser = await _repository.Register(userToCreate, userRegister.Password);
+            User createdUser = await _repository.Register(userToCreate, userRegisterDto.Password);
 
-            return StatusCode(201);
+            UserDetailedDto userDetailedDto = _mapper.Map<UserDetailedDto>(createdUser);
+            
+            return CreatedAtRoute("GetUser", new {controller = "Users", id = createdUser.Id}, userDetailedDto);
         }
 
         [HttpPost("login")]
