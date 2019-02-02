@@ -8,10 +8,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SocNetworkApp.API.Data;
 using SocNetworkApp.API.Dtos;
+using SocNetworkApp.API.Filters;
 using SocNetworkApp.API.Models;
 
 namespace SocNetworkApp.API.Controllers
 {
+    [ServiceFilter(typeof(UserLogActivityFilter))]
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]

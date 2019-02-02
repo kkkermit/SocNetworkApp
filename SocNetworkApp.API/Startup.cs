@@ -20,6 +20,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using SocNetworkApp.API.Data;
+using SocNetworkApp.API.Filters;
 using SocNetworkApp.API.Helpers;
 
 namespace SocNetworkApp.API
@@ -49,7 +50,7 @@ namespace SocNetworkApp.API
             services.AddScoped<IAuthRepository, AuthRepository>();
             services.AddScoped<IDataRepository, DataRepository>();
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                    .AddJwtBearer(options => 
+                    .AddJwtBearer(options =>
                     {
                         options.TokenValidationParameters = new TokenValidationParameters
                         {
@@ -59,6 +60,7 @@ namespace SocNetworkApp.API
                             IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration.GetSection("AppSettings:Token").Value)),
                         };
                     });
+            services.AddScoped<UserLogActivityFilter>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
