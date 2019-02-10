@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using SocNetworkApp.API.Data;
 using SocNetworkApp.API.Dtos;
 using SocNetworkApp.API.Filters;
+using SocNetworkApp.API.Helpers;
 using SocNetworkApp.API.Models;
 
 namespace SocNetworkApp.API.Controllers
@@ -25,14 +26,20 @@ namespace SocNetworkApp.API.Controllers
         public UsersController(IDataRepository repository, IMapper mapper)
         {
             _mapper = mapper;
-            _repository = repository;   
+            _repository = repository;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetUsers()
+        public async Task<IActionResult> GetUsers([FromQuery]UserParams userParams)
         {
-            IEnumerable<User> users = await _repository.GetUsers();
+            Guid currentuserId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            User user = await _repository.GetUser(currentuserId);
+            userParams.UserId = currentuserId;
+
+            PagedList<User> users = await _repository.GetUsers(userParams);
             IEnumerable<UserListDto> userListDtos = _mapper.Map<IEnumerable<UserListDto>>(users);
+
+            Response.AddPagination(users.CurrentPage, users.PageSize, users.TotalPages, users.TotalCount);
 
             return Ok(userListDtos);
         }

@@ -1,15 +1,26 @@
 using System;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace SocNetworkApp.API.Helpers
 {
     public static class Extensions
     {
-        public static void AddApplicationError(this HttpResponse respose, string message) 
+        public static void AddApplicationError(this HttpResponse response, string message) 
         {
-            respose.Headers.Add("Application-Error", message);
-            respose.Headers.Add("Access-Control-Expose-Headers", "Application-Error");
-            respose.Headers.Add("Access-Control-Allow-Origin", "*");
+            response.Headers.Add("Application-Error", message);
+            response.Headers.Add("Access-Control-Expose-Headers", "Application-Error");
+            response.Headers.Add("Access-Control-Allow-Origin", "*");
+        }
+
+        public static void AddPagination(this HttpResponse response, int currentPage, int itemsPerPage, int totalPages, int totalItems)
+        {
+            PaginationHeader paginationHeader = new PaginationHeader(currentPage, itemsPerPage, totalPages, totalItems);
+            JsonSerializerSettings camelCaseFormatter = new JsonSerializerSettings();
+            camelCaseFormatter.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            response.Headers.Add("Pagination", JsonConvert.SerializeObject(paginationHeader, camelCaseFormatter));
+            response.Headers.Add("Access-Control-Expose-Headers", "Pagination");
         }
 
         public static int CalculateAge(this DateTime dateTime)

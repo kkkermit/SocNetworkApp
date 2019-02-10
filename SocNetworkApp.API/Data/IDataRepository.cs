@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SocNetworkApp.API.Helpers;
 using SocNetworkApp.API.Models;
 
 namespace SocNetworkApp.API.Data
@@ -10,7 +11,7 @@ namespace SocNetworkApp.API.Data
         void Add<T>(T entity) where T : class;
         void Delete<T>(T entity) where T : class;
         Task<bool> SaveAll();
-        Task<IEnumerable<User>> GetUsers();
+        Task<PagedList<User>> GetUsers(UserParams userParams);
         Task<User> GetUser(Guid id);
         Task<Photo> GetPhoto(Guid id);
         Task<Photo> GetMainPhotoForUser(Guid userId);

@@ -19,7 +19,7 @@ namespace SocNetworkApp.API.Filters
             IDataRepository reposityory = resultContext.HttpContext.RequestServices.GetService<IDataRepository>();
 
             User user = await reposityory.GetUser(userId);
-
+            
             user.LastActive = DateTime.Now;
 
             await reposityory.SaveAll();
