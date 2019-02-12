@@ -71,5 +71,41 @@ namespace SocNetworkApp.API.Controllers
 
             throw new Exception($"Updating user {id} failed on save");
         }
+
+        [HttpPost("{id}/like/{recipientId}")]
+        public async Task<IActionResult> LikeUser(Guid id, Guid recipientId)
+        {
+            if (id != Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value)) 
+            {
+                return Unauthorized();
+            }
+
+            Like like = await _repository.GetLike(id, recipientId);
+
+            if (like != null)
+            {
+                return BadRequest("You already liked this user");
+            }
+
+            if (await _repository.GetUser(recipientId) == null)
+            {
+                return NotFound();   
+            }
+
+            like = new Like()
+            {
+                LikerId = id,
+                LikeeId = recipientId
+            };
+
+            _repository.Add<Like>(like);
+
+            if (await _repository.SaveAll())
+            {
+                return Ok();
+            }
+
+            return BadRequest("Failed to like user");
+        }
     }
 }

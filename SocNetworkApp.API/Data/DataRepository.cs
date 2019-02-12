@@ -27,6 +27,11 @@ namespace SocNetworkApp.API.Data
             _context.Remove(entity);
         }
 
+        public async Task<Like> GetLike(Guid userId, Guid recipientId)
+        {
+            return await _context.Likes.FirstOrDefaultAsync(u => u.LikerId == userId && u.LikeeId == recipientId);   
+        }
+
         public async Task<Photo> GetMainPhotoForUser(Guid userId)
         {
             return await _context.Photos.FirstOrDefaultAsync(p => p.UserId == userId && p.IsMain);
@@ -56,6 +61,18 @@ namespace SocNetworkApp.API.Data
                 users = users.Where(u => u.Id != userParams.UserId && u.Gender == userParams.Gender);
             }
 
+            if (userParams.Likers)
+            {
+                IEnumerable<Guid> userLikers = await GetUserLikes(userParams.UserId, userParams.Likers);
+                users = users.Where(u => userLikers.Contains(u.Id));
+            }
+
+            if (userParams.Likees)
+            {
+                IEnumerable<Guid> userLikees = await GetUserLikes(userParams.UserId, userParams.Likers);
+                users = users.Where(u => userLikees.Contains(u.Id));
+            }
+
             if (userParams.MinAge != 18 || userParams.MaxAge != 99)
             {
                 DateTime minDob = DateTime.Today.AddYears(-userParams.MaxAge - 1);
@@ -79,11 +96,25 @@ namespace SocNetworkApp.API.Data
             return await PagedList<User>.CreateAsync(users, userParams.PageNumber, userParams.PageSize);
         }
 
+        private async Task<IEnumerable<Guid>> GetUserLikes(Guid id, bool likers)
+        {
+            User user = await _context.Users.Include(x => x.Likers)
+                                            .Include(x => x.Likees)
+                                            .FirstOrDefaultAsync(u => u.Id == id);
+
+            if (likers)
+            {
+                return user.Likers.Where(u => u.LikeeId == id).Select(u => u.LikerId);
+            }
+            else
+            {
+                return user.Likees.Where(u => u.LikerId == id).Select(u => u.LikeeId);
+            }
+        }
+
         public async Task<bool> SaveAll()
         {
             return await _context.SaveChangesAsync() > 0;
         }
-
-
     }
 }
