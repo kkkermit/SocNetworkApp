@@ -14,7 +14,7 @@ namespace SocNetworkApp.API.Data
 
         public DataRepository(DataContext context)
         {
-            this._context = context;   
+            this._context = context;
         }
 
         public void Add<T>(T entity) where T : class
@@ -115,6 +115,50 @@ namespace SocNetworkApp.API.Data
         public async Task<bool> SaveAll()
         {
             return await _context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<Message> GetMessage(Guid id)
+        {
+            return await _context.Messages.FirstOrDefaultAsync(m => m.Id == id);
+        }
+
+
+        public async Task<IEnumerable<Message>> GetMessageThread(Guid userId, Guid recipientId)
+        {
+            List<Message> messages = await _context.Messages
+                                            .Include(u => u.Sender).ThenInclude(p => p.Photos)
+                                            .Include(u => u.Recipient).ThenInclude(p => p.Photos)
+                                            .Where(m => m.RecipientId == userId && !m.RecipientDeleted && m.SenderId == recipientId 
+                                                     || m.RecipientId == recipientId  && !m.SenderDeleted && m.SenderId == userId)
+                                            .OrderByDescending(m => m.MessageSent)
+                                            .ToListAsync();
+
+            return messages;
+        }
+
+        public async Task<PagedList<Message>> GetMessagesForUser(MessageParams messageParams)
+        {
+            IQueryable<Message> messages = _context.Messages
+                                            .Include(u => u.Sender).ThenInclude(p => p.Photos)
+                                            .Include(u => u.Recipient).ThenInclude(p => p.Photos)
+                                            .AsQueryable();
+
+            switch (messageParams.MessageContainer)
+            {
+                case "Inbox":
+                    messages = messages.Where(u => u.RecipientId == messageParams.UserId && !u.RecipientDeleted);
+                    break;
+                case "Outbox":
+                    messages = messages.Where(u => u.SenderId == messageParams.UserId && !u.SenderDeleted);
+                    break;
+                default:
+                    messages = messages.Where(u => u.RecipientId == messageParams.UserId && !u.IsRead && !u.RecipientDeleted);
+                    break;
+            }
+
+            messages = messages.OrderByDescending(d => d.MessageSent);
+
+            return await PagedList<Message>.CreateAsync(messages, messageParams.PageNumber, messageParams.PageSize);
         }
     }
 }

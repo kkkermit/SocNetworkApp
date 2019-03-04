@@ -16,5 +16,8 @@ namespace SocNetworkApp.API.Data
         Task<Photo> GetPhoto(Guid id);
         Task<Photo> GetMainPhotoForUser(Guid userId);
         Task<Like> GetLike(Guid userId, Guid recipientId);
+        Task<Message> GetMessage(Guid id);
+        Task<PagedList<Message>> GetMessagesForUser(MessageParams messageParams);
+        Task<IEnumerable<Message>> GetMessageThread(Guid userId, Guid recipientId);
     }
 }

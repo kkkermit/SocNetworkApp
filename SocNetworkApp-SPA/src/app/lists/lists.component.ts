@@ -40,4 +40,9 @@ export class ListsComponent implements OnInit {
     });
   }
 
+  pageChanged(event: any) {
+    this.pagination.currentPage = event.page;
+    this.loadUsers();
+  }
+
 }
