@@ -26,8 +26,6 @@ export class MessagesComponent implements OnInit {
       this.messages = data['messages'].result;
       this.pagination = data['messages'].pagination;
     });
-
-    console.log(this.messages.length);
   }
 
   deleteMessage(id: string) {
