@@ -7,42 +7,41 @@ import { User } from '../_models/user';
 import { AuthService } from '../_services/auth.service';
 
 @Component({
-  selector: 'app-lists',
-  templateUrl: './lists.component.html',
-  styleUrls: ['./lists.component.css']
+    selector: 'app-lists',
+    templateUrl: './lists.component.html',
+    styleUrls: ['./lists.component.css']
 })
 export class ListsComponent implements OnInit {
-  users: User[];
-  pagination: Pagination;
-  likesParam: string;
+    users: User[];
+    pagination: Pagination;
+    likesParam: string;
 
-  constructor(private authService: AuthService,
-              private userService: UserService,
-              private route: ActivatedRoute,
-              private alertify: AlertifyService) { }
+    constructor(private authService: AuthService,
+        private userService: UserService,
+        private route: ActivatedRoute,
+        private alertify: AlertifyService) { }
 
-  ngOnInit() {
-    this.route.data.subscribe(data => {
-      this.users = data['users'].result;
-      this.pagination = data['users'].pagination;
-    });
+    ngOnInit() {
+        this.route.data.subscribe(data => {
+            this.users = data['users'].result;
+            this.pagination = data['users'].pagination;
+        });
 
-    this.likesParam = 'Likers';
-  }
+        this.likesParam = 'Likers';
+    }
 
-  loadUsers() {
-    this.userService.getUsers(this.pagination.currentPage, this.pagination.itemsPerPage, null, this.likesParam)
-      .subscribe((paginationResult: PaginatedResult<User[]>) => {
-      this.users = paginationResult.result;
-      this.pagination = paginationResult.pagination;
-    }, error => {
-      this.alertify.error(error);
-    });
-  }
+    loadUsers() {
+        this.userService.getUsers(this.pagination.currentPage, this.pagination.itemsPerPage, null, this.likesParam)
+            .subscribe((paginationResult: PaginatedResult<User[]>) => {
+                this.users = paginationResult.result;
+                this.pagination = paginationResult.pagination;
+            }, error => {
+                this.alertify.error(error);
+            });
+    }
 
-  pageChanged(event: any) {
-    this.pagination.currentPage = event.page;
-    this.loadUsers();
-  }
-
+    pageChanged(event: any) {
+        this.pagination.currentPage = event.page;
+        this.loadUsers();
+    }
 }

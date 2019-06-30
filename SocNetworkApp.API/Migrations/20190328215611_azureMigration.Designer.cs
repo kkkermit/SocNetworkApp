@@ -10,14 +10,14 @@ using SocNetworkApp.API.Data;
 namespace SocNetworkApp.API.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20190217182005_MessagesEntityAdded")]
-    partial class MessagesEntityAdded
+    [Migration("20190328215611_azureMigration")]
+    partial class azureMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.2.1-servicing-10028")
+                .HasAnnotation("ProductVersion", "2.2.3-servicing-35854")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -45,7 +45,7 @@ namespace SocNetworkApp.API.Migrations
 
                     b.Property<bool>("IsRead");
 
-                    b.Property<DateTime>("MeesageSent");
+                    b.Property<DateTime>("MessageSent");
 
                     b.Property<bool>("RecipientDeleted");
 
@@ -145,7 +145,7 @@ namespace SocNetworkApp.API.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("SocNetworkApp.API.Models.User", "Sender")
-                        .WithMany("MeesagesSent")
+                        .WithMany("MessagesSent")
                         .HasForeignKey("SenderId")
                         .OnDelete(DeleteBehavior.Restrict);
                 });

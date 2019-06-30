@@ -1,7 +1,7 @@
 import { MessagesResolver } from './_resolvers/messages-resolver';
 import { ListResolver } from './_resolvers/lists.resolver';
 import { PreventUnsavedChanges } from './_guards/prevent-unsaved-changes.guard';
-import { MemberEditComponent } from './members/member-edit/member-edit/member-edit.component';
+import { MemberEditComponent } from './members/member-edit/member-edit.component';
 import { MemberListResolver } from './_resolvers/member-list.resolver';
 import { MemberDetailResolver } from './_resolvers/member-detail.resolver';
 import { MemberCardComponent } from './members/member-card/member-card.component';
@@ -52,7 +52,7 @@ export function tokenGetter() {
       MemberEditComponent,
       PhotoEditorComponent,
       TimeAgoPipe,
-      MemberMessagesComponent
+      MemberMessagesComponent,
    ],
    imports: [
       BrowserModule,
