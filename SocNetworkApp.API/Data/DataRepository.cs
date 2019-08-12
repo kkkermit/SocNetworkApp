@@ -39,12 +39,19 @@ namespace SocNetworkApp.API.Data
 
         public async Task<Photo> GetPhoto(Guid id)
         {
-            return await _context.Photos.FirstOrDefaultAsync(p => p.Id == id);
+            return await _context.Photos.IgnoreQueryFilters().FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task<User> GetUser(Guid id)
+        public async Task<User> GetUser(Guid id, bool isCurrentUser)
         {
-            return await _context.Users.Include(p => p.Photos).FirstOrDefaultAsync(u => u.Id == id);
+            IQueryable<User> query = _context.Users.Include(p => p.Photos).AsQueryable();
+
+            if (isCurrentUser) 
+            {
+                query = query.IgnoreQueryFilters();
+            }
+
+            return await query.FirstOrDefaultAsync(u => u.Id == id);
         }
 
         public async Task<PagedList<User>> GetUsers(UserParams userParams)

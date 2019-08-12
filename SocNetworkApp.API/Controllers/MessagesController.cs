@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SocNetworkApp.API.Data;
 using SocNetworkApp.API.Dtos;
@@ -13,11 +12,9 @@ using SocNetworkApp.API.Models;
 
 namespace SocNetworkApp.API.Controllers
 {
-    
+    [ApiController]
     [ServiceFilter(typeof(UserLogActivityFilter))]
     [Route("api/users/{userId}/[controller]")]
-    [ApiController]
-    [Authorize]
     public class MessagesController : ControllerBase
     {
         private readonly IDataRepository _repository;
@@ -68,7 +65,7 @@ namespace SocNetworkApp.API.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateMessage(Guid userId, MessageCreationDto messageCreationDto)
         {
-            User sender = await _repository.GetUser(userId);
+            User sender = await _repository.GetUser(userId, false);
 
             if (sender?.Id != Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value)) 
             {
@@ -77,7 +74,7 @@ namespace SocNetworkApp.API.Controllers
 
             messageCreationDto.SenderId = userId;
 
-            User recipient = await _repository.GetUser(messageCreationDto.RecipientId);
+            User recipient = await _repository.GetUser(messageCreationDto.RecipientId, false);
 
             if (recipient == null)
             {

@@ -12,7 +12,7 @@ namespace SocNetworkApp.API.Data
         void Delete<T>(T entity) where T : class;
         Task<bool> SaveAll();
         Task<PagedList<User>> GetUsers(UserParams userParams);
-        Task<User> GetUser(Guid id);
+        Task<User> GetUser(Guid id, bool isCurrentUser);
         Task<Photo> GetPhoto(Guid id);
         Task<Photo> GetMainPhotoForUser(Guid userId);
         Task<Like> GetLike(Guid userId, Guid recipientId);

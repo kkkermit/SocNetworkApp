@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SocNetworkApp.API.Data;
 using SocNetworkApp.API.Dtos;
@@ -14,10 +12,9 @@ using SocNetworkApp.API.Models;
 
 namespace SocNetworkApp.API.Controllers
 {
+    [ApiController]
     [ServiceFilter(typeof(UserLogActivityFilter))]
     [Route("api/[controller]")]
-    [ApiController]
-    [Authorize]
     public class UsersController : ControllerBase
     {
         private readonly IDataRepository _repository;
@@ -32,9 +29,10 @@ namespace SocNetworkApp.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUsers([FromQuery]UserParams userParams)
         {
-            Guid currentuserId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            User user = await _repository.GetUser(currentuserId);
-            userParams.UserId = currentuserId;
+            Guid currentUserId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+            User user = await _repository.GetUser(currentUserId, true);
+            userParams.UserId = currentUserId;
 
             PagedList<User> users = await _repository.GetUsers(userParams);
             IEnumerable<UserListDto> userListDtos = _mapper.Map<IEnumerable<UserListDto>>(users);
@@ -47,7 +45,8 @@ namespace SocNetworkApp.API.Controllers
         [HttpGet("{id}", Name = "GetUser")]
         public async Task<IActionResult> GetUser(Guid id)
         {
-            User user = await _repository.GetUser(id);
+            bool isCurrentUser = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value) == id;
+            User user = await _repository.GetUser(id, isCurrentUser);
             UserDetailedDto userDetailedDto = _mapper.Map<UserDetailedDto>(user);
 
             return Ok(userDetailedDto);
@@ -61,7 +60,7 @@ namespace SocNetworkApp.API.Controllers
                 return Unauthorized();
             }
 
-            User user = await _repository.GetUser(id);
+            User user = await _repository.GetUser(id, true);
             _mapper.Map(userUpdateDto, user);
 
             if (await _repository.SaveAll())
@@ -87,7 +86,7 @@ namespace SocNetworkApp.API.Controllers
                 return BadRequest("You already liked this user");
             }
 
-            if (await _repository.GetUser(recipientId) == null)
+            if (await _repository.GetUser(recipientId, false) == null)
             {
                 return NotFound();   
             }

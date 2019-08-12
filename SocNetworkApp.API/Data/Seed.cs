@@ -5,37 +5,64 @@ using System.Text;
 using Newtonsoft.Json;
 using System.Linq;
 using SocNetworkApp.API.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace SocNetworkApp.API.Data
 {
     public class Seed
     {
-        private readonly DataContext _context;
-        public Seed(DataContext context)
+        private readonly UserManager<User> _userNamager;
+        public RoleManager<Role> _roleManager;
+
+        public Seed(UserManager<User> userNamager, RoleManager<Role> roleManager)
         {
-            this._context = context;
+            _userNamager = userNamager;
+            _roleManager = roleManager;
         }
 
         public void SeedUsers()
         {
-            if (!_context.Users.Any())
+            if (!_userNamager.Users.Any())
             {
                 string userData = File.ReadAllText("Data/UserSeedData.json");
                 List<User> users = JsonConvert.DeserializeObject<List<User>>(userData);
 
-                foreach (User user in users)
+                List<Role> roles = new List<Role>
                 {
-                    byte[] passwordHash, passwordSalt;
-                    CreatePasswordHash("password", out passwordHash, out passwordSalt);
+                    new Role { Name = "Member" },
+                    new Role { Name = "Admin" },
+                    new Role { Name = "Moderator" },
+                    new Role { Name = "VIP" }
+                };
 
-                    user.PasswordHash = passwordHash;
-                    user.PasswordSalt = passwordSalt;
-                    user.Username = user.Username.ToLower();
-
-                    _context.Users.Add(user);
+                foreach (Role role in roles)
+                {
+                    _roleManager.CreateAsync(role).Wait();
                 }
 
-                _context.SaveChanges();
+                foreach (User user in users)
+                {
+                    if (user.Photos.FirstOrDefault() != null)
+                    {
+                        user.Photos.SingleOrDefault().IsApproved = true;
+                    }
+
+                    _userNamager.CreateAsync(user, "password").Wait();
+                    _userNamager.AddToRoleAsync(user, "Member").Wait();
+                }
+
+                User adminUser = new User
+                {
+                    UserName = "Admin"
+                };
+
+                IdentityResult result = _userNamager.CreateAsync(adminUser, "password").Result;
+
+                if (result.Succeeded)
+                {
+                    User admin = _userNamager.FindByNameAsync("Admin").Result;
+                    _userNamager.AddToRolesAsync(admin, new[] { "Admin", "Moderator" }).Wait();
+                }
             }
         }
 

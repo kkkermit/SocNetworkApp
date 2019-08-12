@@ -1,14 +1,11 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity;
 
 namespace SocNetworkApp.API.Models
 {
-    public class User
+    public class User : IdentityUser<Guid>
     {
-        public Guid Id { get; set; }
-        public string Username { get; set; }
-        public byte[] PasswordHash { get; set; }
-        public byte[] PasswordSalt { get; set; }
         public string City { get; set; }
         public string Country { get; set; }
         public string Gender { get; set; }
@@ -24,5 +21,6 @@ namespace SocNetworkApp.API.Models
         public ICollection<Like> Likees { get; set; }
         public ICollection<Message> MessagesSent { get; set; }
         public ICollection<Message> MessagesRecived { get; set; }
+        public ICollection<UserRole> UserRoles { get; set; }
     }
 }

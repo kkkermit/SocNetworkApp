@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using AutoMapper;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -16,10 +15,9 @@ using SocNetworkApp.API.Helpers;
 using SocNetworkApp.API.Models;
 
 namespace SocNetworkApp.API.Controllers
-{
-    [Route("api/users/{userId}/photos")]
+{  
     [ApiController]
-    [Authorize]
+    [Route("api/users/{userId}/photos")]
     public class PhotosController : ControllerBase
     {
         private readonly IDataRepository _repository;
@@ -63,7 +61,7 @@ namespace SocNetworkApp.API.Controllers
                 return Unauthorized();
             }
 
-            User user = await _repository.GetUser(userId);
+            User user = await _repository.GetUser(userId, true);
 
             IFormFile file = photoCreationDto.File;
 
@@ -115,7 +113,7 @@ namespace SocNetworkApp.API.Controllers
                 return Unauthorized();
             }
 
-            User user = await _repository.GetUser(userId);
+            User user = await _repository.GetUser(userId, true);
 
             if (!user.Photos.Any(p => p.Id == id))
             {
@@ -153,7 +151,7 @@ namespace SocNetworkApp.API.Controllers
                 return Unauthorized();
             }
 
-            User user = await _repository.GetUser(userId);
+            User user = await _repository.GetUser(userId, true);
 
             if (!user.Photos.Any(p => p.Id == id))
             {
@@ -162,10 +160,10 @@ namespace SocNetworkApp.API.Controllers
 
             Photo photo = await _repository.GetPhoto(id);
 
-            // if (photo.IsMain)
-            // {
-            //     return BadRequest("You cannot delete your main photo");
-            // }
+            if (photo.IsMain)
+            {
+                return BadRequest("You cannot delete your main photo");
+            }
 
             if (string.IsNullOrEmpty(photo.PublicId))
             {

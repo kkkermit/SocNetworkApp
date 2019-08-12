@@ -1,27 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace SocNetworkApp.API.Controllers
 {
-    [Route("api/[controller]")]
+    
     [ApiController]
     [Authorize]
+    [Route("api/[controller]")]
     public class ValuesController : ControllerBase
     {
         // GET api/values
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public ActionResult<IEnumerable<string>> Get()
         {
             return new string[] { "value1", "value2" };
         }
 
         // GET api/values/5
+        [Authorize(Roles = "Member")]
         [HttpGet("{id}")]
-        [AllowAnonymous]
         public ActionResult<string> Get(int id)
         {
             return "value";
